@@ -1,43 +1,45 @@
+// Entidades do App de Monitoramento Climático e Ambiental
+
 Table Usuario {
   id int [pk, increment]
   nome varchar(100)
   email varchar(100)
   senha varchar(50)
-  tipo varchar(50)  // Ex: cidadão, pesquisador, administrador
+  tipo varchar(50)  // ex: cidadão, pesquisador, administrador
 }
 
-Table CategoriaEvento {
+Table CategoriaEventoAmbiental {
   id int [pk, increment]
-  nome varchar(50)
+  nome varchar(50)          // ex: Queimada, Inundação, Desmatamento
   descricao text
 }
 
-Table Evento {
+Table EventoAmbiental {
   id int [pk, increment]
-  tipo varchar(50)
-  data datetime
-  local varchar(100)
-  status varchar(20)
   categoria_id int
+  data_hora datetime
+  localizacao varchar(100)  // cidade, coordenadas, etc.
+  status varchar(20)        // ex: ativo, resolvido, em análise
 }
 
-Table Relato {
+Table RelatoUsuario {
   id int [pk, increment]
-  descricao text
-  midia varchar(255)
-  data_envio datetime
   usuario_id int
   evento_id int
+  descricao text
+  midia varchar(255)        // link ou caminho da foto/vídeo
+  data_envio datetime
 }
 
-Table Notificacao {
+Table NotificacaoUsuario {
   id int [pk, increment]
+  usuario_id int
   mensagem text
   data_envio datetime
-  usuario_id int
 }
 
-Ref: Evento.categoria_id > CategoriaEvento.id
-Ref: Relato.usuario_id > Usuario.id
-Ref: Relato.evento_id > Evento.id
-Ref: Notificacao.usuario_id > Usuario.id
+// Relacionamentos
+Ref: EventoAmbiental.categoria_id > CategoriaEventoAmbiental.id
+Ref: RelatoUsuario.usuario_id > Usuario.id
+Ref: RelatoUsuario.evento_id > EventoAmbiental.id
+Ref: NotificacaoUsuario.usuario_id > Usuario.id
