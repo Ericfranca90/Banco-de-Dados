@@ -1,0 +1,43 @@
+Table Usuario {
+  id int [pk, increment]
+  nome varchar(100)
+  email varchar(100)
+  senha varchar(50)
+  tipo varchar(50)  // Ex: cidadão, pesquisador, administrador
+}
+
+Table CategoriaEvento {
+  id int [pk, increment]
+  nome varchar(50)
+  descricao text
+}
+
+Table Evento {
+  id int [pk, increment]
+  tipo varchar(50)
+  data datetime
+  local varchar(100)
+  status varchar(20)
+  categoria_id int
+}
+
+Table Relato {
+  id int [pk, increment]
+  descricao text
+  midia varchar(255)
+  data_envio datetime
+  usuario_id int
+  evento_id int
+}
+
+Table Notificacao {
+  id int [pk, increment]
+  mensagem text
+  data_envio datetime
+  usuario_id int
+}
+
+Ref: Evento.categoria_id > CategoriaEvento.id
+Ref: Relato.usuario_id > Usuario.id
+Ref: Relato.evento_id > Evento.id
+Ref: Notificacao.usuario_id > Usuario.id
