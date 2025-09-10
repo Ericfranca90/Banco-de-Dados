@@ -1,57 +1,64 @@
 
 
--- Criação do Banco (só precisa rodar 1 vez)
+-- Criação do Banco (só precisa rodar uma vez)
 CREATE DATABASE clima_alerta;
 
 -- Conectar ao banco:
 -- \c clima_alerta;
 
 ------------------------------------------------
--- TABELAS PRINCIPAIS
+-- TABELAS
 ------------------------------------------------
 
-CREATE TABLE tipo_evento (
+-- Tipos de Evento
+CREATE TABLE tipo_evento(
     id_tipo_evento SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT
 );
 
+-- Estados
 CREATE TABLE estado (
     sigla_estado CHAR(2) PRIMARY KEY,
     nome_estado VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE localizacao (
+-- Localização
+CREATE TABLE localizacao(
     id_localizacao SERIAL PRIMARY KEY,
-    latitude NUMERIC(9, 6) NOT NULL,
-    longitude NUMERIC(9, 6) NOT NULL,
+    latitude NUMERIC(9,6) NOT NULL,
+    longitude NUMERIC(9,6) NOT NULL,
     cidade VARCHAR(100) NOT NULL,
     sigla_estado CHAR(2) NOT NULL REFERENCES estado(sigla_estado)
 );
 
-CREATE TABLE usuario (
+-- Usuários
+CREATE TABLE usuario(
     id_usuario SERIAL PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     senha_hash VARCHAR(255) NOT NULL
 );
 
+-- Telefones
 CREATE TABLE telefone (
     id_telefone SERIAL PRIMARY KEY,
     numero VARCHAR(20) NOT NULL UNIQUE,
     id_usuario INT NOT NULL REFERENCES usuario(id_usuario)
 );
 
+-- Eventos
 CREATE TABLE evento (
     id_evento SERIAL PRIMARY KEY,
     titulo VARCHAR(150) NOT NULL,
     descricao TEXT,
     data_hora TIMESTAMP NOT NULL,
-    status VARCHAR(30) CHECK (status IN ('Ativo', 'Em Monitoramento', 'Resolvido')),
+    status VARCHAR(30) CHECK (status IN ('Ativo','EmMonitoramento','Resolvido')),
     id_tipo_evento INT NOT NULL REFERENCES tipo_evento(id_tipo_evento),
     id_localizacao INT NOT NULL REFERENCES localizacao(id_localizacao)
 );
 
+-- Relatos
 CREATE TABLE relato (
     id_relato SERIAL PRIMARY KEY,
     texto TEXT NOT NULL,
@@ -60,25 +67,17 @@ CREATE TABLE relato (
     id_usuario INT NOT NULL REFERENCES usuario(id_usuario)
 );
 
+-- Alertas
 CREATE TABLE alerta (
     id_alerta SERIAL PRIMARY KEY,
     mensagem TEXT NOT NULL,
     data_hora TIMESTAMP NOT NULL,
-    nivel VARCHAR(20) CHECK (nivel IN ('Baixo', 'Médio', 'Alto', 'Crítico')),
+    nivel VARCHAR(20) CHECK (nivel IN ('Baixo','Médio','Alto','Crítico')),
     id_evento INT NOT NULL REFERENCES evento(id_evento)
 );
 
-CREATE TABLE historico_evento (
-    id_historico SERIAL PRIMARY KEY,
-    id_evento INT NOT NULL REFERENCES evento(id_evento),
-    status_anterior VARCHAR(30),
-    status_novo VARCHAR(30),
-    data_modificacao TIMESTAMP NOT NULL,
-    modificado_por_usuario_id INT REFERENCES usuario(id_usuario)
-);
-
 ------------------------------------------------
--- INSERÇÃO DE DADOS INICIAIS (Atividade anterior)
+-- INSERÇÃO DE DADOS INICIAIS
 ------------------------------------------------
 
 -- Estados
@@ -88,97 +87,107 @@ INSERT INTO estado (sigla_estado, nome_estado) VALUES
 ('MG', 'Minas Gerais');
 
 -- Tipos de Evento
-INSERT INTO tipo_evento (nome, descricao) VALUES
-('Queimada', 'Incêndio de grandes proporções em áreas de vegetação.'),
-('Inundação', 'Acúmulo excessivo de água em uma determinada área.'),
-('Deslizamento', 'Movimento de terra ou rochas em encostas.');
+INSERT INTO tipo_evento(nome, descricao) VALUES
+('Queimada', 'Incêndio em área de vegetação ou urbana'),
+('Enchente', 'Alagamentos por chuvas intensas ou transbordo'),
+('Deslizamento', 'Movimento de massa em encostas');
 
 -- Usuários
-INSERT INTO usuario (nome, email, senha_hash) VALUES
-('Maria Oliveira', 'maria.oliveira@email.com', 'hash_senha_maria'),
-('João Silva', 'joao.silva@email.com', 'hash_senha_joao'),
-('Ana Costa', 'ana.costa@email.com', 'hash_senha_ana');
+INSERT INTO usuario(nome, email, senha_hash) VALUES
+('Maria Oliveira', 'maria.oliveira@email.com', 'hash$1'),
+('João Souza', 'joao.souza@email.com', 'hash$2'),
+('Ana Lima', 'ana.lima@email.com', 'hash$3');
 
 -- Localizações
-INSERT INTO localizacao (latitude, longitude, cidade, sigla_estado) VALUES
+INSERT INTO localizacao(latitude, longitude, cidade, sigla_estado) VALUES
 (-23.305000, -45.965000, 'Jacareí', 'SP'),
-(-22.906800, -43.172900, 'Rio de Janeiro', 'RJ'),
-(-19.916700, -43.934500, 'Belo Horizonte', 'MG');
-
--- Eventos iniciais
-INSERT INTO evento (titulo, descricao, data_hora, status, id_tipo_evento, id_localizacao) VALUES
-('Queimada na Serra da Mantiqueira', 'Fogo se alastrando próximo a áreas residenciais.', '2025-08-22 14:30:00', 'Ativo', 1, 1),
-('Inundação no Centro do Rio', 'Fortes chuvas causam alagamentos em vias principais.', '2025-08-21 10:00:00', 'Em Monitoramento', 2, 2),
-('Risco de Deslizamento em Ouro Preto', 'Solo encharcado apresenta risco para moradias.', '2025-08-22 09:15:00', 'Resolvido', 3, 3);
-
--- Relatos
-INSERT INTO relato (texto, data_hora, id_evento, id_usuario) VALUES
-('Muita fumaça visível da rodovia!', '2025-08-22 15:00:00', 1, 1),
-('A rua principal está completamente alagada.', '2025-08-21 11:30:00', 2, 2);
-
--- Alertas
-INSERT INTO alerta (mensagem, data_hora, nivel, id_evento) VALUES
-('Alerta Crítico: Evacuem a área próxima à serra imediatamente.', '2025-08-22 15:10:00', 'Crítico', 1),
-('Alerta Médio: Evitem o centro da cidade devido a alagamentos.', '2025-08-21 10:30:00', 'Médio', 2);
+(-22.785000, -43.304000, 'Duque de Caxias', 'RJ'),
+(-19.924500, -43.935200, 'Belo Horizonte', 'MG');
 
 ------------------------------------------------
--- NOVOS INSERIDOS (Atividade atual)
+-- EVENTOS (com chaves estrangeiras)
 ------------------------------------------------
 
--- Evento extra 1: Deslizamento em MG
+-- Evento 1: Queimada em Jacareí (SP)
 INSERT INTO evento (titulo, descricao, data_hora, status, id_tipo_evento, id_localizacao)
 VALUES (
-    'Deslizamento em encosta urbana',
-    'Casas próximas apresentam rachaduras após fortes chuvas.',
-    '2025-08-18 07:45:00',
-    'Ativo',
-    (SELECT id_tipo_evento FROM tipo_evento WHERE nome = 'Deslizamento'),
-    (SELECT id_localizacao FROM localizacao WHERE cidade = 'Belo Horizonte' AND sigla_estado = 'MG')
+'Queimada em área de preservação',
+'Foco de incêndio próximo à represa municipal.',
+'2025-08-15 14:35:00',
+'Ativo',
+(SELECT id_tipo_evento FROM tipo_evento WHERE nome = 'Queimada'),
+(SELECT id_localizacao FROM localizacao WHERE cidade = 'Jacareí' AND sigla_estado= 'SP')
 );
 
--- Evento extra 2: Enchente em SP
+-- Evento 2: Enchente em Duque de Caxias (RJ)
 INSERT INTO evento (titulo, descricao, data_hora, status, id_tipo_evento, id_localizacao)
 VALUES (
-    'Enchente na Marginal Tietê',
-    'Água invadiu vias expressas, causando congestionamento severo.',
-    '2025-08-19 08:20:00',
-    'Em Monitoramento',
-    (SELECT id_tipo_evento FROM tipo_evento WHERE nome = 'Inundação'),
-    (SELECT id_localizacao FROM localizacao WHERE cidade = 'Jacareí' AND sigla_estado = 'SP')
+'Enchente em bairro central',
+'Rua principal alagada; trânsito interrompido.',
+'2025-08-16 09:10:00',
+'EmMonitoramento',
+(SELECT id_tipo_evento FROM tipo_evento WHERE nome = 'Enchente'),
+(SELECT id_localizacao FROM localizacao WHERE cidade = 'Duque de Caxias' AND sigla_estado= 'RJ')
+);
+
+-- Evento 3: Deslizamento em Belo Horizonte (MG)
+INSERT INTO evento (titulo, descricao, data_hora, status, id_tipo_evento, id_localizacao)
+VALUES (
+'Deslizamento em encosta',
+'Queda de barreira após chuva intensa.',
+'2025-08-17 07:50:00',
+'Resolvido',
+(SELECT id_tipo_evento FROM tipo_evento WHERE nome = 'Deslizamento'),
+(SELECT id_localizacao FROM localizacao WHERE cidade = 'Belo Horizonte' AND sigla_estado= 'MG')
+);
+
+-- Evento extra 4: Enchente em São Paulo (SP)
+INSERT INTO evento (titulo, descricao, data_hora, status, id_tipo_evento, id_localizacao)
+VALUES (
+'Enchente na Marginal Tietê',
+'Água invadiu vias expressas, causando congestionamento severo.',
+'2025-08-19 08:20:00',
+'EmMonitoramento',
+(SELECT id_tipo_evento FROM tipo_evento WHERE nome = 'Enchente'),
+(SELECT id_localizacao FROM localizacao WHERE cidade = 'Jacareí' AND sigla_estado= 'SP')
 );
 
 ------------------------------------------------
--- CONSULTAS (Atividade anterior + atualizadas)
+-- CONSULTAS
 ------------------------------------------------
 
--- Listar usuários
-SELECT nome, email FROM usuario;
+-- 2.1 Listar usuários
+SELECT id_usuario, nome, email
+FROM usuario;
 
--- Listar eventos com título e status
-SELECT titulo, status FROM evento;
+-- 2.2 Listar tipos de evento
+SELECT id_tipo_evento, nome, descricao
+FROM tipo_evento;
 
--- Mostrar eventos ativos
-SELECT titulo, descricao, data_hora FROM evento
+-- 3.1 Eventos filtrados por status
+SELECT id_evento, titulo, status, data_hora
+FROM evento
 WHERE status = 'Ativo';
 
--- Localização específica
-SELECT * FROM localizacao
-WHERE cidade = 'Jacareí';
+-- 3.2 Localizações apenas do estado de SP
+SELECT id_localizacao, cidade, sigla_estado
+FROM localizacao
+WHERE sigla_estado= 'SP';
 
--- Eventos não resolvidos, mais recentes primeiro
-SELECT titulo, status, data_hora FROM evento
-WHERE status <> 'Resolvido'
+-- Contagens
+SELECT COUNT(*) FROM estado;
+SELECT COUNT(*) FROM tipo_evento;
+SELECT COUNT(*) FROM usuario;
+SELECT COUNT(*) FROM localizacao;
+SELECT COUNT(*) FROM evento;
+
+-- Ordenação por data (mais recentes primeiro)
+SELECT titulo, data_hora
+FROM evento
 ORDER BY data_hora DESC;
 
--- NOVAS CONSULTAS ORDENADAS
-
--- Listar todos os eventos em ordem cronológica (antigos primeiro)
-SELECT id_evento, titulo, data_hora, status
-FROM evento
-ORDER BY data_hora ASC;
-
--- Mostrar os 3 eventos mais recentes
-SELECT titulo, status, data_hora
+-- Top 3 eventos mais recentes
+SELECT titulo, status
 FROM evento
 ORDER BY data_hora DESC
 LIMIT 3;
