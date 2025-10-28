@@ -1,0 +1,41 @@
+--Listar quantos livros cada autor possui (BD Biblioteca)
+
+SELECT a.nome AS autor, COUNT(l.id_livro) AS total_livros
+--COUNT (para contar os livros) e GROUP BY (para agrupar por autor)
+FROM autor a
+INNER JOIN livro l ON a.id_autor = l.id_autor
+GROUP BY a.nome
+ORDER BY total_livros DESC;
+
+--Mostrar a média de páginas dos livros por editora (BD Biblioteca)
+--pfunção AVG (para a média)  e GROUP BY (para agrupar por editora)
+SELECT e.nomeAS editora, AVG(l.num_paginas) AS media_paginas
+FROM editora e
+INNER JOIN livro l ON e.id_editora= l.id_editora
+GROUP BY e.nome
+ORDER BY media_paginasDESC;
+
+-—Listar o total de campanhas por reservatório (limnologia_db)
+--COUNT e GROUP BY
+SELECT r.nomeAS reservatorio, COUNT(c.id_campanha) AS total_campanhas
+FROM reservatorior
+INNER JOIN campanha c ON r.id_reservatorio= c.id_reservatorio
+GROUP BY r.nome
+ORDER BY total_campanhasDESC;
+
+--Mostrar a média de valores de cada parâmetro em séries temporais (limnologia_db)
+--função AVG  e GROUP BY
+SELECT p.nome_parametro, AVG(s.valor) AS media_valores
+FROM serie_temporals
+INNER JOIN parametrop ON s.id_parametro= p.id_parametro
+GROUP BY p.nome_parametro
+ORDER BY media_valoresDESC;
+
+--Exibir apenas as instituições que realizaram mais de 3 campanhas (limnologia_db)
+--COUNT , GROUP BY e, o mais importante, HAVING  para filtrar o grupo.
+SELECT i.nomeAS instituicao, COUNT(c.id_campanha) AS total_campanhas
+FROM instituicaoi
+INNER JOIN campanha c ON i.id_instituicao= c.id_instituicao
+GROUP BY i.nome
+HAVING COUNT(c.id_campanha) > 3
+ORDER BY total_campanhasDESC;
